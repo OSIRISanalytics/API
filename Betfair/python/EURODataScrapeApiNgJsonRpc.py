@@ -181,11 +181,13 @@ soccerRacingEventTypeID = "1"
 """print 'Eventype Id for Soccer is :' + str(soccerRacingEventTypeID)"""
 
 f1=open('./EURO2016.csv', 'w+')
+i=1
 while 1:
 	marketCatalogueResult = getMarketCatalogueForNextEUROGame(soccerRacingEventTypeID)
 	"""print marketCatalogueResult"""
 	if( marketCatalogueResult is not None):
-		print 'Market and Runner IDs are: '
+		print '@Loop number ' + str(i)
+		i=i+1
 		for market in marketCatalogueResult:
 			marketid = market['marketId']
 			market_book_result = getMarketBookBestOffers(marketid)
