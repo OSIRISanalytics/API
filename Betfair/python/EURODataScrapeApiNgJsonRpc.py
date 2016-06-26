@@ -30,7 +30,7 @@ calling getEventTypes operation
 
 def getEventTypes():
     event_type_req = '{"jsonrpc": "2.0", "method": "SportsAPING/v1.0/listEventTypes", "params": {"filter":{ }}, "id": 1}'
-    print 'Calling listEventTypes to get event Type ID'
+    """print 'Calling listEventTypes to get event Type ID'"""
     eventTypesResponse = callAping(event_type_req)
     eventTypeLoads = json.loads(eventTypesResponse)
     """
@@ -64,12 +64,11 @@ def getEventTypeIDForEventTypeName(eventTypesResult, requestedEventTypeName):
 Calling marketCatalouge to get marketDetails
 """
 
-def getMarketCatalogueForNextUefaGame(eventTypeID):
+def getMarketCatalogueForNextEUROGame(eventTypeID):
     if (eventTypeID is not None):
-        print 'Calling listMarketCatalouge Operation to get MarketID and selectionId'
+        """print 'Calling listMarketCatalouge Operation to get MarketID and selectionId'"""
         now = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
-        market_catalogue_req = '{"jsonrpc": "2.0", "method": "SportsAPING/v1.0/listMarketCatalogue", "params": {"filter":{"eventTypeIds":["' + eventTypeID + '"],"competitionIds":["4527196"],"marketTypeCodes":["MATCH_ODDS"],'\
-                                                                                                                                                             '"marketStartTime":{"from":"' + now + '"}},"sort":"FIRST_TO_START","maxResults":"100","marketProjection":["RUNNER_DESCRIPTION"]}, "id": 1}'
+        market_catalogue_req = '{"jsonrpc": "2.0", "method": "SportsAPING/v1.0/listMarketCatalogue", "params": {"filter":{"eventTypeIds":["' + eventTypeID + '"],"competitionIds":["4527196"],"marketTypeCodes":["MATCH_ODDS"]},"sort":"FIRST_TO_START","maxResults":"100","marketProjection":["RUNNER_DESCRIPTION"]}, "id": 1}'
         """
         print  market_catalogue_req
         """
@@ -80,6 +79,7 @@ def getMarketCatalogueForNextUefaGame(eventTypeID):
         market_catalouge_loads = json.loads(market_catalogue_response)
         try:
             market_catalouge_results = market_catalouge_loads['result']
+            """print market_catalouge_results	"""
             return market_catalouge_results
         except:
             print  'Exception from API-NG' + str(market_catalouge_results['error'])
@@ -99,7 +99,7 @@ def getSelectionId(marketCatalogueResult):
 
 
 def getMarketBookBestOffers(marketId):
-    print 'Calling listMarketBook to read prices for the Market with ID :' + marketId
+    """print 'Calling listMarketBook to read prices for the Market with ID :' + marketId"""
     market_book_req = '{"jsonrpc": "2.0", "method": "SportsAPING/v1.0/listMarketBook", "params": {"marketIds":["' + marketId + '"],"priceProjection":{"priceData":["EX_BEST_OFFERS"]}}, "id": 1}'
     """
     print  market_book_req
@@ -125,8 +125,8 @@ def printPriceInfo(market_book_result):
             for runner in runners:
                 print 'Selection id is ' + str(runner['selectionId'])
                 if (runner['status'] == 'ACTIVE'):
-                    print 'Available to back price :' + str(runner['ex']['availableToBack'])
-                    print 'Available to lay price :' + str(runner['ex']['availableToLay'])
+                    print 'Available to back price :' + str(runner['ex']['availableToBack'][0]['price']) + str(runner['ex']['availableToBack'][0]['size'])
+                    print 'Available to lay price :' + str(runner['ex']['availableToLay'][0]['price']) + str(runner['ex']['availableToBack'][0]['size'])
                 else:
                     print 'This runner is not active'
 
@@ -175,20 +175,56 @@ else:
 
 headers = {'X-Application': appKey, 'X-Authentication': sessionToken, 'content-type': 'application/json'}
 
-eventTypesResult = getEventTypes()
-soccerRacingEventTypeID = getEventTypeIDForEventTypeName(eventTypesResult, 'Soccer')
+"""eventTypesResult = getEventTypes()"""
+"""soccerRacingEventTypeID = getEventTypeIDForEventTypeName(eventTypesResult, 'Soccer')"""
+soccerRacingEventTypeID = "1"
+"""print 'Eventype Id for Soccer is :' + str(soccerRacingEventTypeID)"""
 
-print 'Eventype Id for Soccer is :' + str(soccerRacingEventTypeID)
-
-marketCatalogueResult = getMarketCatalogueForNextUefaGame(soccerRacingEventTypeID)
-print marketCatalogueResult
-if( marketCatalogueResult is not None):
-	print 'Market and Runner IDs are: '
-	for market in marketCatalogueResult:
-		marketid = market['marketId']
-		print marketid
-		market_book_result = getMarketBookBestOffers(marketid)
-		printPriceInfo(market_book_result)
+f1=open('./EURO2016.csv', 'w+')
+while 1:
+	marketCatalogueResult = getMarketCatalogueForNextEUROGame(soccerRacingEventTypeID)
+	"""print marketCatalogueResult"""
+	if( marketCatalogueResult is not None):
+		print 'Market and Runner IDs are: '
+		for market in marketCatalogueResult:
+			marketid = market['marketId']
+			market_book_result = getMarketBookBestOffers(marketid)
+			f1.write(datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ') + ",")
+			TeamA = market['runners'][0]['runnerName']
+			TeamB = market['runners'][1]['runnerName']
+			TeamC = market['runners'][2]['runnerName']
+			TeamApb = str(market_book_result[0]['runners'][0]['ex']['availableToBack'][0]['price'])
+			TeamAsb = str(market_book_result[0]['runners'][0]['ex']['availableToBack'][0]['size'])
+			TeamApl = str(market_book_result[0]['runners'][0]['ex']['availableToLay'][0]['price'])
+			TeamAsl = str(market_book_result[0]['runners'][0]['ex']['availableToLay'][0]['size'])
+			
+			TeamBpb = str(market_book_result[0]['runners'][1]['ex']['availableToBack'][0]['price'])
+			TeamBsb = str(market_book_result[0]['runners'][1]['ex']['availableToBack'][0]['size'])
+			TeamBpl = str(market_book_result[0]['runners'][1]['ex']['availableToLay'][0]['price'])
+			TeamBsl = str(market_book_result[0]['runners'][1]['ex']['availableToLay'][0]['size'])
+			
+			TeamCpb = str(market_book_result[0]['runners'][2]['ex']['availableToBack'][0]['price'])
+			TeamCsb = str(market_book_result[0]['runners'][2]['ex']['availableToBack'][0]['size'])
+			TeamCpl = str(market_book_result[0]['runners'][2]['ex']['availableToLay'][0]['price'])
+			TeamCsl = str(market_book_result[0]['runners'][2]['ex']['availableToLay'][0]['size'])
+			f1.write(marketid + ",")
+			f1.write(TeamA + ",")
+			f1.write(TeamApb + ",")
+			f1.write(TeamAsb + ",")
+			f1.write(TeamApl + ",")
+			f1.write(TeamAsl + ",")
+			f1.write(TeamB + ",")
+			f1.write(TeamBpb + ",")
+			f1.write(TeamBsb + ",")
+			f1.write(TeamBpl + ",")
+			f1.write(TeamBsl + ",")
+			f1.write(TeamC + ",")
+			f1.write(TeamCpb + ",")
+			f1.write(TeamCsb + ",")
+			f1.write(TeamCpl + ",")
+			f1.write(TeamCsl + ",")
+			f1.write(TeamCsl + "\n")
+		
 		
 
 """
