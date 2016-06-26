@@ -64,12 +64,12 @@ def getEventTypeIDForEventTypeName(eventTypesResult, requestedEventTypeName):
 Calling marketCatalouge to get marketDetails
 """
 
-def getMarketCatalogueForNextGBWin(eventTypeID):
+def getMarketCatalogueForNextUefaGame(eventTypeID):
     if (eventTypeID is not None):
         print 'Calling listMarketCatalouge Operation to get MarketID and selectionId'
         now = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
-        market_catalogue_req = '{"jsonrpc": "2.0", "method": "SportsAPING/v1.0/listMarketCatalogue", "params": {"filter":{"eventTypeIds":["' + eventTypeID + '"],"marketCountries":["GB"],"marketTypeCodes":["WIN"],'\
-                                                                                                                                                             '"marketStartTime":{"from":"' + now + '"}},"sort":"FIRST_TO_START","maxResults":"1","marketProjection":["RUNNER_METADATA"]}, "id": 1}'
+        market_catalogue_req = '{"jsonrpc": "2.0", "method": "SportsAPING/v1.0/listMarketCatalogue", "params": {"filter":{"eventTypeIds":["' + eventTypeID + '"],"competitionIds":["4527196"],"marketTypeCodes":["MATCH_ODDS"],'\
+                                                                                                                                                             '"marketStartTime":{"from":"' + now + '"}},"sort":"FIRST_TO_START","maxResults":"100","marketProjection":["RUNNER_DESCRIPTION"]}, "id": 1}'
         """
         print  market_catalogue_req
         """
@@ -89,7 +89,7 @@ def getMarketCatalogueForNextGBWin(eventTypeID):
 def getMarketId(marketCatalogueResult):
     if( marketCatalogueResult is not None):
         for market in marketCatalogueResult:
-            return market['marketId']
+			return market['marketId']
 
 
 def getSelectionId(marketCatalogueResult):
@@ -176,20 +176,27 @@ else:
 headers = {'X-Application': appKey, 'X-Authentication': sessionToken, 'content-type': 'application/json'}
 
 eventTypesResult = getEventTypes()
-horseRacingEventTypeID = getEventTypeIDForEventTypeName(eventTypesResult, 'Horse Racing')
+soccerRacingEventTypeID = getEventTypeIDForEventTypeName(eventTypesResult, 'Soccer')
 
-print 'Eventype Id for Horse Racing is :' + str(horseRacingEventTypeID)
+print 'Eventype Id for Soccer is :' + str(soccerRacingEventTypeID)
 
-marketCatalogueResult = getMarketCatalogueForNextGBWin(horseRacingEventTypeID)
-marketid = getMarketId(marketCatalogueResult)
-runnerId = getSelectionId(marketCatalogueResult)
+marketCatalogueResult = getMarketCatalogueForNextUefaGame(soccerRacingEventTypeID)
+print marketCatalogueResult
+if( marketCatalogueResult is not None):
+	print 'Market and Runner IDs are: '
+	for market in marketCatalogueResult:
+		marketid = market['marketId']
+		print marketid
+		market_book_result = getMarketBookBestOffers(marketid)
+		printPriceInfo(market_book_result)
+		
+
 """
 print marketid
 print runnerId
 """
-market_book_result = getMarketBookBestOffers(marketid)
-printPriceInfo(market_book_result)
 
-placeFailingBet(marketid, runnerId)
+
+"""placeFailingBet(marketid, runnerId)"""
 
 
