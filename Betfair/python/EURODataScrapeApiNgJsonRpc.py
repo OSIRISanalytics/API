@@ -186,46 +186,31 @@ while 1:
 	marketCatalogueResult = getMarketCatalogueForNextEUROGame(soccerRacingEventTypeID)
 	"""print marketCatalogueResult"""
 	if( marketCatalogueResult is not None):
-		print '@Loop number ' + str(i)
-		i=i+1
+		print '@Loop time ' + datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ')
+		"""print 'length is :' + str(len(marketCatalogueResult))"""
 		for market in marketCatalogueResult:
+			j=0
 			marketid = market['marketId']
 			market_book_result = getMarketBookBestOffers(marketid)
-			f1.write(datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ') + ",")
-			TeamA = market['runners'][0]['runnerName']
-			TeamB = market['runners'][1]['runnerName']
-			TeamC = market['runners'][2]['runnerName']
-			TeamApb = str(market_book_result[0]['runners'][0]['ex']['availableToBack'][0]['price'])
-			TeamAsb = str(market_book_result[0]['runners'][0]['ex']['availableToBack'][0]['size'])
-			TeamApl = str(market_book_result[0]['runners'][0]['ex']['availableToLay'][0]['price'])
-			TeamAsl = str(market_book_result[0]['runners'][0]['ex']['availableToLay'][0]['size'])
-			
-			TeamBpb = str(market_book_result[0]['runners'][1]['ex']['availableToBack'][0]['price'])
-			TeamBsb = str(market_book_result[0]['runners'][1]['ex']['availableToBack'][0]['size'])
-			TeamBpl = str(market_book_result[0]['runners'][1]['ex']['availableToLay'][0]['price'])
-			TeamBsl = str(market_book_result[0]['runners'][1]['ex']['availableToLay'][0]['size'])
-			
-			TeamCpb = str(market_book_result[0]['runners'][2]['ex']['availableToBack'][0]['price'])
-			TeamCsb = str(market_book_result[0]['runners'][2]['ex']['availableToBack'][0]['size'])
-			TeamCpl = str(market_book_result[0]['runners'][2]['ex']['availableToLay'][0]['price'])
-			TeamCsl = str(market_book_result[0]['runners'][2]['ex']['availableToLay'][0]['size'])
-			f1.write(marketid + ",")
-			f1.write(TeamA + ",")
-			f1.write(TeamApb + ",")
-			f1.write(TeamAsb + ",")
-			f1.write(TeamApl + ",")
-			f1.write(TeamAsl + ",")
-			f1.write(TeamB + ",")
-			f1.write(TeamBpb + ",")
-			f1.write(TeamBsb + ",")
-			f1.write(TeamBpl + ",")
-			f1.write(TeamBsl + ",")
-			f1.write(TeamC + ",")
-			f1.write(TeamCpb + ",")
-			f1.write(TeamCsb + ",")
-			f1.write(TeamCpl + ",")
-			f1.write(TeamCsl + ",")
-			f1.write(TeamCsl + "\n")
+			if(len(market_book_result) > 0):
+				gameDetails = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%SZ') + ","
+				gameDetails = gameDetails + marketid + ","
+				for runners in market['runners']:
+					TeamA = runners['runnerName']
+					print TeamA
+					if (market_book_result[0]['status'] == 'OPEN'):
+						TeamApb = str(market_book_result[0]['runners'][j]['ex']['availableToBack'][0]['price'])
+						TeamAsb = str(market_book_result[0]['runners'][j]['ex']['availableToBack'][0]['size'])
+						TeamApl = str(market_book_result[0]['runners'][j]['ex']['availableToLay'][0]['price'])
+						TeamAsl = str(market_book_result[0]['runners'][j]['ex']['availableToLay'][0]['size'])
+						gameDetails = gameDetails + TeamA + ","
+						gameDetails = gameDetails + TeamApb + ","
+						gameDetails = gameDetails + TeamAsb + ","
+						gameDetails = gameDetails + TeamApl + ","
+						gameDetails = gameDetails + TeamAsl + ","
+						j = j+1
+				f1.write(gameDetails + "\n")
+				
 		
 		
 
