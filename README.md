@@ -10,3 +10,7 @@ API definitions and call functions for each betting API
 * Database will be sqlite db which has integration with python (sqlite3) and R (RSQLite)
 * Db connection will only be opened at archive point.
 
+#Cals's Notes
+
+*Use the working code directory, you will need to download your own certs and create your own login file (with your account details)
+*ATM it just logs in, sends a keepalive, gets account details, gets some market data

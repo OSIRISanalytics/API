@@ -12,6 +12,9 @@ make a call API-NG
 
 def callAping(jsonrpc_req):
     try:
+        print url
+        print json.dumps(jsonrpc_req,indent=2)
+        print json.dumps(headers,indent=2)
         req = urllib2.Request(url, jsonrpc_req, headers)
         response = urllib2.urlopen(req)
         jsonResponse = response.read()
@@ -23,7 +26,41 @@ def callAping(jsonrpc_req):
         print 'Oops not a valid operation from the service ' + str(url)
         exit()
 
+def callApingAcc(jsonrpc_req):
+    try:
+        print url
+        print json.dumps(jsonrpc_req,indent=2)
+        print json.dumps(headers,indent=2)
+        req = urllib2.Request(accurl, jsonrpc_req, headers)
+        response = urllib2.urlopen(req)
+        jsonResponse = response.read()
+        return jsonResponse
+    except urllib2.URLError:
+        print 'Oops no service available at ' + str(url)
+        exit()
+    except urllib2.HTTPError:
+        print 'Oops not a valid operation from the service ' + str(url)
+        exit()
 
+		
+		
+def getAccountDetails():
+    account_type_req = '{"jsonrpc": "2.0", "method": "AccountAPING/v1.0/getAccountDetails", "params": {}, "id": 1}'
+    print 'Calling Get account Details'
+    accountTypesResponse = callApingAcc(account_type_req)
+    accountTypeLoads = json.loads(accountTypesResponse)
+    
+    print accountTypeLoads
+    
+
+    try:
+        accountTypeResults = accountTypeLoads['result']
+        return accountTypeResults
+    except:
+        print 'Exception from API-NG' + str(accountTypeLoads['error'])
+        exit()
+		
+		
 """
 calling getEventTypes operation
 """
@@ -157,7 +194,7 @@ def placeFailingBet(marketId, selectionId):
 
 
 url = "https://api.betfair.com/exchange/betting/json-rpc/v1"
-
+accurl  = "https://api.betfair.com/exchange/accounts/json-rpc/v1"
 """
 headers = { 'X-Application' : 'xxxxxx', 'X-Authentication' : 'xxxxx' ,'content-type' : 'application/json' }
 """
@@ -173,8 +210,9 @@ else:
     appKey = sys.argv[1]
     sessionToken = sys.argv[2]
 
-headers = {'X-Application': appKey, 'X-Authentication': sessionToken, 'content-type': 'application/json'}
+headers = {'X-Application': appKey, 'X-Authentication': sessionToken, 'content-type': 'application/json','Accept': 'application/json'}
 
+getAccountDetails()
 eventTypesResult = getEventTypes()
 horseRacingEventTypeID = getEventTypeIDForEventTypeName(eventTypesResult, 'Horse Racing')
 
