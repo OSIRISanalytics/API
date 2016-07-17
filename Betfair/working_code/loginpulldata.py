@@ -10,7 +10,7 @@ from betfair import exceptions
 #Tom
 client = login.login('Np2HwoLYyAQk2X6s', 'tombish22','parksandrec19')
 # Cal
-#client = login('eTnX7n6jsiaoGA9g', 'calhamd@gmail.com','wyeslsc10')
+#client = login.login('eTnX7n6jsiaoGA9g', 'calhamd@gmail.com','wyeslsc10')
 
 client.keep_alive()
 
