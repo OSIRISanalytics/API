@@ -1,14 +1,17 @@
 import json
 import betfair
+import login
 from betfair import utils
 from betfair import models
 from betfair import exceptions
 
-from betfair import Betfair
-client = Betfair('eTnX7n6jsiaoGA9g', ('C:/Users/ECALDOW/Dropbox/OSIRIS/cal_betfair_certs/client-2048.crt', 'C:/Users/ECALDOW/Dropbox/OSIRIS/cal_betfair_certs/client-2048.key'))
-print 'Logging in'
-client.login('calhamd@gmail.com', 'wyeslsc10')
 
+#Tom
+client = login.login('Np2HwoLYyAQk2X6s', 'tombish22','parksandrec19')
+# Cal
+#client = login('eTnX7n6jsiaoGA9g', 'calhamd@gmail.com','wyeslsc10')
+
+client.keep_alive()
 
 from betfair.models import MarketFilter
 from betfair.models import PriceProjection
