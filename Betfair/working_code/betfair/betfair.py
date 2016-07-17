@@ -240,7 +240,7 @@ class Betfair(object):
 
     @utils.requires_login
     def list_market_catalogue(
-            self, filter=None, max_results=100, market_projection=None, locale=None,
+            self, filter=None, max_results=1000, market_projection=None, locale=None,
             sort=None):
         """
         :param MarketFilter filter:

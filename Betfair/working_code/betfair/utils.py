@@ -81,9 +81,7 @@ def process_result(result, model=None):
     if model is None:
         return result
     if isinstance(result, collections.Sequence):
-        print 'a'
         return [model(**item) for item in result]
-    print 'b'
     return model(**result)
 
 
