@@ -76,6 +76,7 @@ class MarketCatalogue(BetfairModel):
     event = ModelType(Event)
 
 
+
 class TimeRange(BetfairModel):
     from_ = DateTimeType(deserialize_from='from', serialized_name='from')
     to = DateTimeType()
@@ -479,3 +480,62 @@ class CurrencyRate(BetfairModel):
 
 class TransferResponse(BetfairModel):
     transaction_id = StringType()
+
+class MarketData():
+    def __init__(self, catalog, marketbook):
+		self.market_id = catalog.market_id
+		self.market_name = catalog.market_name
+		self.market_start_time = catalog.market_start_time
+		self.description = catalog.description
+		self.total_matched = catalog.total_matched
+		self.runner_catalog = catalog.runners
+		self.event_type = catalog.event_type
+		self.competition = catalog.competition
+		self.event = catalog.event
+		self.is_market_data_delayed = marketbook.is_market_data_delayed
+		self.status = marketbook.status
+		self.bet_delay = marketbook.bet_delay
+		self.bsp_reconciled = marketbook.bsp_reconciled
+		self.complete = marketbook.complete
+		self.inplay = marketbook.inplay
+		self.number_of_winners = marketbook.number_of_winners
+		self.number_of_runners = marketbook.number_of_runners
+		self.number_of_active_runners = marketbook.number_of_active_runners
+		self.last_match_time = marketbook.last_match_time
+		self.total_matched = marketbook.total_matched
+		self.total_available = marketbook.total_available
+		self.cross_matching = marketbook.cross_matching
+		self.runners_voidable = marketbook.runners_voidable
+		self.version = marketbook.version
+		self.runners = marketbook.runners
+#MarketCatalogueData	
+    market_id = StringType()
+    market_name = StringType()
+    market_start_time = DateTimeType()
+    description = ModelType(MarketDescription)
+    total_matched = FloatType()
+    runner_catalog = ListType(ModelType(RunnerCatalog))
+    event_type = ModelType(EventType)
+    competition = ModelType(Competition)
+    event = ModelType(Event)
+#MarketBookData
+    is_market_data_delayed = BooleanType
+    status = EnumType(constants.MarketStatus)
+    bet_delay = IntType()
+    bsp_reconciled = BooleanType()
+    complete = BooleanType()
+    inplay = BooleanType()
+    number_of_winners = IntType()
+    number_of_runners = IntType()
+    number_of_active_runners = IntType()
+    last_match_time = DateTimeType()
+    total_matched = FloatType()
+    total_available = FloatType()
+    cross_matching = BooleanType()
+    runners_voidable = BooleanType()
+    version = FloatType()
+    runners = ListType(ModelType(Runner))
+    
+	
+	
+	

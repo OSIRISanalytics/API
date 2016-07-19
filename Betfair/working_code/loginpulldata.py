@@ -1,22 +1,18 @@
-import json
-import betfair
 import login
 import pandas as pd
 from betfair import utils
 from betfair import models
 from betfair import exceptions
 
-
 #Tom
-client = login.login('Np2HwoLYyAQk2X6s', 'tombish22','parksandrec19')
+#client = login.login('Np2HwoLYyAQk2X6s', 'tombish22','parksandrec19')
 # Cal
-#client = login('eTnX7n6jsiaoGA9g', 'calhamd@gmail.com','wyeslsc10')
-
-client.keep_alive()
+client = login.login('eTnX7n6jsiaoGA9g', 'calhamd@gmail.com','wyeslsc10')
 
 from betfair.models import MarketFilter
 from betfair.models import PriceProjection
 from betfair.models import ExBestOffersOverrides
+from betfair.models import MarketData
 
 MarketSearch = raw_input('Enter Sports String to search: ')
 
@@ -44,26 +40,25 @@ MarketType = market_types[int(MarketTypeSearch)].market_type
 
 print 'Market Type Selected: ' + MarketType
 
+#Fetch all the betting markets
 betting_markets = client.list_market_catalogue(MarketFilter(event_type_ids=[sport_event_type.event_type.id], market_type_codes=[MarketType]), market_projection =  ['COMPETITION','EVENT','EVENT_TYPE','RUNNER_DESCRIPTION','MARKET_START_TIME'])
 print 'Markets on Sport: ' + str(len(betting_markets))
 
-print vars(betting_markets[0])
-print betting_markets[0].competition
-print betting_markets[0].event.name
-print betting_markets[0].runners[0]
-print betting_markets[0].event_type
-print "+++++++++++++++++++++++++"
+print betting_markets[0].serialize()
 
+#find out how many are non zero
 key = 0
 for eachMarket in betting_markets:
     if eachMarket.total_matched > 0:
 	    key = key+1                 
 print 'Non-Zero Markets on Sport: ' + str(key)
 
+#Gets the list of market IDs in the Betting Market
 sports_market_ids = []
 for eachMarket in betting_markets:
     sports_market_ids = sports_market_ids + [eachMarket.market_id]
-	
+
+#Get the MarketBookResults
 maxpullsize = 100
 index=0
 print len(sports_market_ids)
@@ -72,55 +67,52 @@ while index+maxpullsize < len(sports_market_ids):
 	marketbook_result = marketbook_result + client.list_market_book([sports_market_ids[index:index+maxpullsize]],PriceProjection(price_data=['EX_BEST_OFFERS'],exBestOffersOverrides=ExBestOffersOverrides(best_prices_depth=1)))
 	index=index+maxpullsize
 marketbook_result = marketbook_result + client.list_market_book([sports_market_ids[index:len(sports_market_ids)]],PriceProjection(price_data=['EX_BEST_OFFERS'],exBestOffersOverrides=ExBestOffersOverrides(best_prices_depth=1)))	
-print len(marketbook_result)
-print vars(marketbook_result[0])
-print vars(marketbook_result[0].runners[0].ex)
-print vars(marketbook_result[1].runners[0].ex.available_to_lay[0])
 
-details = betting_markets["market_id" == marketbook_result[0].market_id]
-
-
-
-print pd.DataFrame.from_dict(details.__dict__)
+print 'Compiling Dataset'
+market_data = []
+for market in betting_markets:
+    next_market_data = MarketData(market,next((x for x in marketbook_result if x.market_id == market.market_id), None))
+    market_data.append(next_market_data)
 
 
+print 'Creating individual runner data'
+runner_data = []
+for mindex, market in enumerate(market_data):
+    print mindex
+    for rindex, runner in enumerate(market.runners):
+        runner_to_add = {'Market ID': market.market_id, 
+                            'Market Name': market.market_name, 
+                            'Market Start Time': market.market_start_time,
+                            'Total_Matched':market.total_matched,
+                            'Active Runners':market.number_of_active_runners,
+                            'Status':market.status,
+                            'Total Available':market.total_available,
+                            'Total Matched':market.total_matched,
+                            'Selection ID':market.runner_catalog[rindex].selection_id,
+                            'Runner Name':market.runner_catalog[rindex].runner_name,
+                            'Price Selection ID':runner.selection_id,
+                            'Runner status':runner.status
+                            }
+        
+        if len(runner.ex.available_to_back)>0:
+            runner_to_add.update({                         
+                            'available_to_back_price':runner.ex.available_to_back[0].price,
+                            'available_to_back_market':runner.ex.available_to_back[0].size
+                            })
+        if len(runner.ex.available_to_lay)>0:
+            runner_to_add.update({                         
+                            'available_to_lay_price':runner.ex.available_to_lay[0].price,
+                            'available_to_lay_market':runner.ex.available_to_lay[0].size
+                            })
+        runner_data.append(runner_to_add)
 
-def convertDF(output):
 
-    import pandas as pd
-
-    for result in marketbook_result:
-
-        for runner in result.runners:
-
-            details = betting_markets["market_id" == result.market_id].serialize()
-
-            game_id = details["event"]["id"]
-            game_name = details["event"]["name"]
-            game_start = details["event"]["openDate"]
-
-            sport_id = details["eventType"]["id"]
+MarketDf = pd.DataFrame(runner_data)
+print MarketDf
 
 
-            runner.selectionId
-
-            for index in details["runners"]:
-                if index.selectionId == runner.selectionId:
-                    team_name = index.runnerName
-
-
-            home_team = details["runners"][0]["runnerName"]
-            home_id = details["runners"][0]["selectionId"]
-
-            away_team = details["runners"][1]["runnerName"]
-            away_id = details["runners"][1]["selectionId"]
-
-            draw_team = details["runners"][2]["runnerName"]
-            draw_id = details["runners"][2]["selectionId"]
-
-            details.__dict__
-
-            runner.ex.available_to_back[0]
-            runner.ex.available_to_lay[0]
-
-client.logout()
+#def convertDF(input):
+    #for market in input:
+        #Create Game Columns
+        
+#client.logout()
